@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="com.eventmanager.fe.gui.Canbo.Lapbaocaothongke">
+  <grid id="27dc6" binding="mainPanel" layout-manager="BorderLayout" hgap="0" vgap="0">
+    <constraints>
+      <xy x="20" y="20" width="549" height="400"/>
+    </constraints>
+    <properties/>
+    <border type="none"/>
+    <children>
+      <component id="6f370" class="javax.swing.JLabel">
+        <constraints border-constraint="North"/>
+        <properties>
+          <font name="Arial" size="30" style="1"/>
+          <text value="LẬP BÁO CÁO VÀ THỐNG KÊ"/>
+        </properties>
+      </component>
+      <grid id="dd5e5" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="1">
+        <constraints border-constraint="Center"/>
+        <properties>
+          <background color="-8412495"/>
+        </properties>
+        <border type="none"/>
+        <children>
+          <component id="70034" class="javax.swing.JLabel">
+            <constraints/>
+            <properties>
+              <text value="Loại báo cáo"/>
+            </properties>
+          </component>
+          <component id="859c3" class="javax.swing.JComboBox" binding="cbLoaiBaoCao">
+            <constraints/>
+            <properties>
+              <model>
+                <item value="Báo cáo tổng quan sự kiện"/>
+                <item value="Báo cáo tiến độ công việc"/>
+                <item value="Báo cáo người tham gia"/>
+              </model>
+            </properties>
+          </component>
+          <component id="e66cd" class="javax.swing.JLabel">
+            <constraints/>
+            <properties>
+              <text value="Từ ngày:"/>
+            </properties>
+          </component>
+          <grid id="ad195" binding="pnlNgayBatDau" layout-manager="BorderLayout" hgap="0" vgap="0">
+            <constraints/>
+            <properties/>
+            <border type="none"/>
+            <children/>
+          </grid>
+          <component id="ee5fb" class="javax.swing.JLabel">
+            <constraints/>
+            <properties>
+              <text value="Đến ngày:"/>
+            </properties>
+          </component>
+          <grid id="dbe40" binding="pnlNgayKetThuc" layout-manager="BorderLayout" hgap="0" vgap="0">
+            <constraints/>
+            <properties/>
+            <border type="none"/>
+            <children/>
+          </grid>
+          <component id="71431" class="javax.swing.JButton" binding="xemBáoCáoButton" default-binding="true">
+            <constraints/>
+            <properties>
+              <text value="Xem báo cáo"/>
+            </properties>
+          </component>
+          <component id="974e1" class="javax.swing.JButton" binding="xuấtExcelButton" default-binding="true">
+            <constraints/>
+            <properties>
+              <text value="Xuất excel"/>
+            </properties>
+          </component>
+        </children>
+      </grid>
+      <grid id="a11dd" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints border-constraint="South"/>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="dd36d" class="javax.swing.JTextArea" binding="textArea1" default-binding="true">
+            <constraints border-constraint="Center"/>
+            <properties/>
+          </component>
+        </children>
+      </grid>
+    </children>
+  </grid>
+</form>
