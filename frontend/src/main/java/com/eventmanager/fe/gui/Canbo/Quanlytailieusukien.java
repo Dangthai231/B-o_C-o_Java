@@ -49,6 +49,5 @@ public class Quanlytailieusukien {
     }
 
     private void $$$setupUI$$$() {
-        // IntelliJ GUI Designer sẽ inject code tạo giao diện từ Quanlytailieusukien.form
     }
 }

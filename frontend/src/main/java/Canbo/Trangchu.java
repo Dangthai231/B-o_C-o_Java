@@ -63,6 +63,5 @@ public class Trangchu {
     }
 
     private void $$$setupUI$$$() {
-        // IntelliJ GUI Designer sẽ inject code tạo giao diện từ Trangchu.form
     }
 }

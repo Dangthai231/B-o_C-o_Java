@@ -264,7 +264,6 @@ public class Lapbaocaothongke {
     }
 
     private void $$$setupUI$$$() {
-        // IntelliJ GUI Designer sẽ inject code tạo giao diện từ Lapbaocaothongke.form
     }
 
 }

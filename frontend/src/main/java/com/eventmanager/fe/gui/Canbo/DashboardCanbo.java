@@ -97,7 +97,6 @@ public class DashboardCanbo {
     }
 
     private void $$$setupUI$$$() {
-        // IntelliJ GUI Designer sẽ inject code tạo giao diện từ DashboardCanbo.form
     }
 
     public static void main(String[] args) {

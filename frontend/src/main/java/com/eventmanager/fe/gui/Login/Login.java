@@ -14,6 +14,8 @@ import java.net.http.HttpResponse;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import javax.swing.*;
+
 public class Login {
     private JPanel mainPanel;
     private JTextField txtTenDangNhap;
@@ -120,8 +122,6 @@ public class Login {
     }
 
     private void $$$setupUI$$$() {
-        // IntelliJ GUI Designer sẽ inject code tạo giao diện từ Login.form vào đây
-        // (Method này để trống trong source, IntelliJ sẽ thay thế bằng code thật khi biên dịch)
     }
 
     public static void main(String[] args) {

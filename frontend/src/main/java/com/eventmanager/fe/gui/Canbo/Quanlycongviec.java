@@ -56,6 +56,5 @@ public class Quanlycongviec {
     }
 
     private void $$$setupUI$$$() {
-        // IntelliJ GUI Designer sẽ inject code tạo giao diện từ Quanlycongviec.form
     }
 }
