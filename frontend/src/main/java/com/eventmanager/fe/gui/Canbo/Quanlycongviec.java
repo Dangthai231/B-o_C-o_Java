@@ -1,54 +1,47 @@
 package com.eventmanager.fe.gui.Canbo;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableModel;
+import java.awt.*;
 
 public class Quanlycongviec {
     private JPanel panel1;
-    private JTabbedPane tabbedPaneCongViec;
     private JTable tableDanhSachCongViec;
-    private JTable table1;
-    private JComboBox comboBox1;
-    private JComboBox comboBox2;
-    private JComboBox comboBox3;
-    private JTextField textField1;
-    private JTextField textField2;
-    private JTextField textField3;
-    private JTextField textField4;
-    private JTextArea textArea1;
-    private JProgressBar progressBar1;
-    private JTable table2;
-    private JScrollPane tableDanhSachNhanSu;
-    private JButton btnLuu;
-    private JButton btnAddCV;
-    private JButton btnXacNhan;
-    private JButton btnXemCt;
-    private JButton btnReturn;
-    private JButton btnClose;
-    private JButton btnUpdate;
+    private DefaultTableModel modelCongViec;
 
     public Quanlycongviec() {
-        $$$setupUI$$$();
-        setupTable();
+        initUI();
     }
 
-    private void setupTable() {
-        // 1. Tạo mảng chứa tên các cột theo thiết kế
-        String[] columnNames = {"Mã CV", "Tên công việc", "Trạng thái", "Tiến độ", "Nhân sự"};
+    private void initUI() {
+        panel1 = new JPanel(new BorderLayout(0, 15));
+        panel1.setBackground(Color.WHITE);
+        panel1.setBorder(new EmptyBorder(20, 25, 20, 25));
 
-        // 2. Tạo một TableModel mới với các cột vừa định nghĩa
-        DefaultTableModel modelCongViec = new DefaultTableModel(columnNames, 0) {
+        JLabel lblTitle = new JLabel("Quản lý công việc");
+        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        lblTitle.setForeground(new Color(30, 30, 30));
+        panel1.add(lblTitle, BorderLayout.NORTH);
+
+        String[] columnNames = {"Mã CV", "Tên công việc", "Trạng thái", "Tiến độ", "Nhân sự"};
+        modelCongViec = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false; // Khóa không cho sửa trực tiếp
+                return false;
             }
         };
 
-        // 3. Gắn model vào JTable
-        tableDanhSachCongViec.setModel(modelCongViec);
-
-        // 4. Chỉnh độ rộng cột "Tên công việc"
+        tableDanhSachCongViec = new JTable(modelCongViec);
+        tableDanhSachCongViec.setRowHeight(28);
+        tableDanhSachCongViec.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         tableDanhSachCongViec.getColumnModel().getColumn(1).setPreferredWidth(200);
+
+        JScrollPane scrollPane = new JScrollPane(tableDanhSachCongViec);
+        scrollPane.getViewport().setBackground(Color.WHITE);
+        scrollPane.setBorder(new LineBorder(new Color(200, 200, 200)));
+        panel1.add(scrollPane, BorderLayout.CENTER);
     }
 
     public JPanel getMainPanel() {

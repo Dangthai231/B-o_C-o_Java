@@ -21,16 +21,19 @@ public class AuthController {
         String username = request.get("tenDangNhap");
         String password = request.get("matKhau");
 
-        Optional<TaiKhoan> tkOpt = repo.findByTenDangNhap(username);
+        if (username == null || password == null) {
+            return ResponseEntity.badRequest().body(Map.of("status", "error", "message", "Thiếu tài khoản hoặc mật khẩu"));
+        }
+
+        Optional<TaiKhoan> tkOpt = repo.findByTenDangNhap(username.trim());
 
         if (tkOpt.isPresent()) {
             TaiKhoan tk = tkOpt.get();
-            // So sánh mật khẩu (Trong thực tế nên dùng BCrypt mã hóa, ở đây demo so sánh chuỗi thường)
-            if (tk.getMatKhau().equals(password)) {
-                // Đăng nhập đúng, trả về vai trò để FE điều hướng
+            if (tk.getMatKhau().equals(password.trim())) {
                 return ResponseEntity.ok(Map.of(
                         "status", "success",
-                        "vaiTro", tk.getVaiTro()
+                        "vaiTro", tk.getVaiTro(),
+                        "tenDangNhap", tk.getTenDangNhap()
                 ));
             }
         }

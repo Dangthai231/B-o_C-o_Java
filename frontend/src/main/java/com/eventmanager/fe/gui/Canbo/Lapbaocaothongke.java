@@ -1,264 +1,228 @@
 package com.eventmanager.fe.gui.Canbo;
 
-import com.toedter.calendar.JDateChooser;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import javax.swing.*;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 public class Lapbaocaothongke {
-    private JComboBox cbLoaiBaoCao;
-
-    private JPanel pnlNgayBatDau;
-    private JPanel pnlNgayKetThuc;
     private JPanel mainPanel;
-    private JButton xemBáoCáoButton;
-    private JButton xuấtExcelButton;
-    private JTextArea textArea1;
+    private JLabel lblCapNhat;
 
-    //khai báo 2 biến Date chooser
-    private JDateChooser dateChooserNgayKetThuc;
-    private JDateChooser dateChooserBatDau;
+    private JLabel lblTongSuKien;
+    private JLabel lblDangDienRa;
+    private JLabel lblHoanThanh;
+    private JLabel lblDaHuy;
+    private JLabel lblTongThamGia;
+    private JLabel lblDaThamDu;
+    private JLabel lblTyLeThamDu;
 
-    private final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+    private BarChartPanel chartPanel;
+    private int[] monthlyData = {1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 0, 0};
 
-    //hàm khởi tạo
     public Lapbaocaothongke() {
-        // Hàm này tự động liên kết code với file .form
-        $$$setupUI$$$();
-        //khởi tạo và đưa vào Panel ngày bắt đầu
-        dateChooserBatDau = new JDateChooser();
-        dateChooserBatDau.setDateFormatString("dd/MM/yyyy");
-        if (pnlNgayBatDau != null) {
-            pnlNgayBatDau.setLayout(new BoxLayout(pnlNgayBatDau, BoxLayout.Y_AXIS));
-            pnlNgayBatDau.add(dateChooserBatDau);
-            pnlNgayBatDau.revalidate();
-            pnlNgayBatDau.repaint();
-        }
-
-        dateChooserNgayKetThuc = new JDateChooser();
-        dateChooserNgayKetThuc.setDateFormatString("dd/MM/yyyy");
-        if (pnlNgayKetThuc != null) {
-            pnlNgayKetThuc.setLayout(new BoxLayout(pnlNgayKetThuc, BoxLayout.Y_AXIS));
-            pnlNgayKetThuc.add(dateChooserNgayKetThuc);
-            pnlNgayKetThuc.revalidate();
-            pnlNgayKetThuc.repaint();
-        }
-
-        // Cấu hình JTextArea hiển thị báo cáo
-        if (textArea1 != null) {
-            textArea1.setEditable(false);
-            textArea1.setFont(new Font("Monospaced", Font.PLAIN, 13));
-            textArea1.setLineWrap(true);
-            textArea1.setWrapStyleWord(true);
-            textArea1.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-            // Nội dung mặc định hướng dẫn
-            textArea1.setText(hienThiHuongDan());
-        }
-
-        // Gắn sự kiện nút Xem báo cáo
-        if (xemBáoCáoButton != null) {
-            xemBáoCáoButton.addActionListener(e -> xemBaoCao());
-        }
-
-        // Gắn sự kiện nút Xuất excel
-        if (xuấtExcelButton != null) {
-            xuấtExcelButton.addActionListener(e -> xuatExcel());
-        }
+        initUI();
+        loadBaoCaoData();
     }
 
-    /**
-     * Hiển thị hướng dẫn mặc định khi chưa xem báo cáo.
-     */
-    private String hienThiHuongDan() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("HƯỚNG DẪN SỬ DỤNG CHỨC NĂNG LẬP BÁO CÁO - THỐNG KÊ\n");
-        sb.append("═══════════════════════════════════════════════════════\n\n");
-        sb.append("1. Chọn \"Loại báo cáo\" từ danh sách thả xuống:\n");
-        sb.append("   - Báo cáo tổng quan sự kiện\n");
-        sb.append("   - Báo cáo tiến độ công việc\n");
-        sb.append("   - Báo cáo người tham gia\n\n");
-        sb.append("2. Chọn khoảng thời gian (Từ ngày - Đến ngày) để lọc dữ liệu.\n\n");
-        sb.append("3. Nhấn nút \"Xem báo cáo\" để hiển thị báo cáo dạng văn bản tại đây.\n\n");
-        sb.append("4. Nhấn nút \"Xuất excel\" để xuất báo cáo ra file .xlsx.\n\n");
-        sb.append("═══════════════════════════════════════════════════════\n");
-        sb.append("Lưu ý: Nếu không chọn ngày, hệ thống sẽ dùng khoảng thời gian mặc định (30 ngày gần nhất).");
-        return sb.toString();
+    private void initUI() {
+        mainPanel = new JPanel();
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+        mainPanel.setBackground(Color.WHITE);
+        mainPanel.setBorder(new EmptyBorder(15, 20, 20, 20));
+
+        // 1. KPI Cards Bar (7 metrics)
+        JPanel kpiRow = new JPanel(new GridLayout(1, 7, 10, 0));
+        kpiRow.setBackground(Color.WHITE);
+        kpiRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 75));
+        kpiRow.setPreferredSize(new Dimension(850, 75));
+
+        lblTongSuKien = new JLabel("12", SwingConstants.CENTER);
+        kpiRow.add(createKpiCard("Tổng sự kiện", lblTongSuKien, new Color(43, 91, 132)));
+
+        lblDangDienRa = new JLabel("3", SwingConstants.CENTER);
+        kpiRow.add(createKpiCard("Đang diễn ra", lblDangDienRa, new Color(30, 136, 229)));
+
+        lblHoanThanh = new JLabel("7", SwingConstants.CENTER);
+        kpiRow.add(createKpiCard("Hoàn thành", lblHoanThanh, new Color(46, 125, 50)));
+
+        lblDaHuy = new JLabel("2", SwingConstants.CENTER);
+        kpiRow.add(createKpiCard("Đã hủy", lblDaHuy, new Color(211, 47, 47)));
+
+        lblTongThamGia = new JLabel("30", SwingConstants.CENTER);
+        kpiRow.add(createKpiCard("T.số tham gia", lblTongThamGia, new Color(123, 31, 162)));
+
+        lblDaThamDu = new JLabel("16", SwingConstants.CENTER);
+        kpiRow.add(createKpiCard("Đã tham dự", lblDaThamDu, new Color(0, 137, 123)));
+
+        lblTyLeThamDu = new JLabel("53%", SwingConstants.CENTER);
+        kpiRow.add(createKpiCard("Tỷ lệ tham dự", lblTyLeThamDu, new Color(230, 81, 0)));
+
+        mainPanel.add(kpiRow);
+        mainPanel.add(Box.createVerticalStrut(15));
+
+        // 2. Filter Row
+        JPanel filterRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 0));
+        filterRow.setBackground(Color.WHITE);
+        filterRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
+
+        JCheckBox chkLocNgay = new JCheckBox("Lọc ngày:");
+        chkLocNgay.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        chkLocNgay.setBackground(Color.WHITE);
+        filterRow.add(chkLocNgay);
+
+        JLabel lblTuNgay = new JLabel("Từ ngày:");
+        lblTuNgay.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        filterRow.add(lblTuNgay);
+
+        JTextField txtTuNgay = new JTextField("01/01/2026", 8);
+        txtTuNgay.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        txtTuNgay.setBorder(new CompoundBorder(new LineBorder(new Color(180, 180, 180)), new EmptyBorder(3, 6, 3, 6)));
+        filterRow.add(txtTuNgay);
+
+        JLabel lblDenNgay = new JLabel("Đến:");
+        lblDenNgay.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        filterRow.add(lblDenNgay);
+
+        JTextField txtDenNgay = new JTextField("31/12/2026", 8);
+        txtDenNgay.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        txtDenNgay.setBorder(new CompoundBorder(new LineBorder(new Color(180, 180, 180)), new EmptyBorder(3, 6, 3, 6)));
+        filterRow.add(txtDenNgay);
+
+        JButton btnXemBaoCao = new JButton("Xem báo cáo");
+        btnXemBaoCao.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        btnXemBaoCao.setBackground(new Color(60, 120, 168));
+        btnXemBaoCao.setForeground(Color.WHITE);
+        btnXemBaoCao.setFocusPainted(false);
+        btnXemBaoCao.setBorder(new EmptyBorder(6, 16, 6, 16));
+        btnXemBaoCao.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        filterRow.add(btnXemBaoCao);
+
+        lblCapNhat = new JLabel("Cập nhật lúc " + LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
+        lblCapNhat.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        lblCapNhat.setForeground(new Color(100, 100, 100));
+        filterRow.add(lblCapNhat);
+
+        btnXemBaoCao.addActionListener(e -> {
+            lblCapNhat.setText("Cập nhật lúc " + LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
+            loadBaoCaoData();
+        });
+
+        mainPanel.add(filterRow);
+        mainPanel.add(Box.createVerticalStrut(15));
+
+        // 3. Dark Banner Bar: "Báo cáo Thống kê"
+        JPanel darkBanner = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 8));
+        darkBanner.setBackground(new Color(30, 34, 56));
+        darkBanner.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        darkBanner.setPreferredSize(new Dimension(850, 40));
+
+        JLabel lblBanner = new JLabel("Báo cáo  Thống kê");
+        lblBanner.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        lblBanner.setForeground(Color.WHITE);
+        darkBanner.add(lblBanner);
+
+        mainPanel.add(darkBanner);
+        mainPanel.add(Box.createVerticalStrut(15));
+
+        // 4. Chart Title
+        JPanel chartTitlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        chartTitlePanel.setBackground(Color.WHITE);
+        chartTitlePanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 25));
+
+        JLabel lblChartTitle = new JLabel("Số sự kiện theo tháng");
+        lblChartTitle.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        lblChartTitle.setForeground(new Color(30, 30, 30));
+        chartTitlePanel.add(lblChartTitle);
+
+        mainPanel.add(chartTitlePanel);
+        mainPanel.add(Box.createVerticalStrut(10));
+
+        // 5. Chart Panel (Custom paint matching WinForms chart)
+        chartPanel = new BarChartPanel(monthlyData);
+        chartPanel.setBackground(Color.WHITE);
+        chartPanel.setPreferredSize(new Dimension(800, 320));
+        mainPanel.add(chartPanel);
     }
 
-    /**
-     * Xử lý khi nhấn nút Xem báo cáo: sinh nội dung báo cáo dạng văn bản.
-     */
-    private void xemBaoCao() {
-        if (textArea1 == null) return;
+    private JPanel createKpiCard(String label, JLabel lblVal, Color valueColor) {
+        JPanel card = new JPanel(new BorderLayout(0, 4));
+        card.setBackground(Color.WHITE);
+        card.setBorder(new CompoundBorder(
+                new LineBorder(new Color(230, 235, 240), 1),
+                new EmptyBorder(8, 8, 8, 8)
+        ));
 
-        String loaiBaoCao = (String) cbLoaiBaoCao.getSelectedItem();
-        Date tuNgay = dateChooserBatDau.getDate();
-        Date denNgay = dateChooserNgayKetThuc.getDate();
+        JLabel lblName = new JLabel(label, SwingConstants.CENTER);
+        lblName.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblName.setForeground(new Color(100, 100, 100));
+        card.add(lblName, BorderLayout.NORTH);
 
-        // Xử lý khoảng ngày mặc định nếu người dùng chưa chọn
-        if (tuNgay == null) {
-            tuNgay = new Date(System.currentTimeMillis() - 30L * 24 * 60 * 60 * 1000);
-        }
-        if (denNgay == null) {
-            denNgay = new Date();
-        }
+        lblVal.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        lblVal.setForeground(valueColor);
+        card.add(lblVal, BorderLayout.CENTER);
 
-        if (tuNgay.after(denNgay)) {
-            JOptionPane.showMessageDialog(mainPanel,
-                    "Ngày bắt đầu không được lớn hơn ngày kết thúc!",
-                    "Lỗi", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        String noiDung = taoNoiDungBaoCao(loaiBaoCao, tuNgay, denNgay);
-        textArea1.setText(noiDung);
-        textArea1.setCaretPosition(0); // cuộn lên đầu
+        return card;
     }
 
-    /**
-     * Tạo nội dung báo cáo dạng văn bản theo loại báo cáo.
-     */
-    private String taoNoiDungBaoCao(String loaiBaoCao, Date tuNgay, Date denNgay) {
-        StringBuilder sb = new StringBuilder();
+    private void loadBaoCaoData() {
+        SwingWorker<Void, Void> worker = new SwingWorker<>() {
+            @Override
+            protected Void doInBackground() {
+                try {
+                    HttpClient client = HttpClient.newHttpClient();
+                    HttpRequest request = HttpRequest.newBuilder()
+                            .uri(URI.create("http://localhost:8080/api/thongke/bao-cao"))
+                            .GET()
+                            .build();
 
-        // Tiêu đề chung
-        sb.append("═══════════════════════════════════════════════════════════\n");
-        sb.append("           BÁO CÁO ").append(loaiBaoCao.toUpperCase()).append("\n");
-        sb.append("═══════════════════════════════════════════════════════════\n");
-        sb.append("Khoảng thời gian: ").append(sdf.format(tuNgay))
-                .append("  đến  ").append(sdf.format(denNgay)).append("\n");
-        sb.append("Ngày lập báo cáo: ").append(sdf.format(new Date())).append("\n");
-        sb.append("Người lập: Cán bộ sự kiện\n");
-        sb.append("───────────────────────────────────────────────────────────\n\n");
+                    HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                    if (response.statusCode() == 200) {
+                        JsonObject json = JsonParser.parseString(response.body()).getAsJsonObject();
+                        SwingUtilities.invokeLater(() -> {
+                            if (json.has("tongSuKien") && lblTongSuKien != null)
+                                lblTongSuKien.setText(String.valueOf(json.get("tongSuKien").getAsInt()));
+                            if (json.has("dangDienRa") && lblDangDienRa != null)
+                                lblDangDienRa.setText(String.valueOf(json.get("dangDienRa").getAsInt()));
+                            if (json.has("hoanThanh") && lblHoanThanh != null)
+                                lblHoanThanh.setText(String.valueOf(json.get("hoanThanh").getAsInt()));
+                            if (json.has("daHuy") && lblDaHuy != null)
+                                lblDaHuy.setText(String.valueOf(json.get("daHuy").getAsInt()));
+                            if (json.has("tongThamGia") && lblTongThamGia != null)
+                                lblTongThamGia.setText(String.valueOf(json.get("tongThamGia").getAsInt()));
+                            if (json.has("daThamDu") && lblDaThamDu != null)
+                                lblDaThamDu.setText(String.valueOf(json.get("daThamDu").getAsInt()));
+                            if (json.has("tyLeThamDu") && lblTyLeThamDu != null)
+                                lblTyLeThamDu.setText(json.get("tyLeThamDu").getAsString());
 
-        switch (loaiBaoCao) {
-            case "Báo cáo tổng quan sự kiện":
-                sb.append(baoCaoTongQuanSuKien());
-                break;
-            case "Báo cáo tiến độ công việc":
-                sb.append(baoCaoTienDoCongViec());
-                break;
-            case "Báo cáo người tham gia":
-                sb.append(baoCaoNguoiThamGia());
-                break;
-            default:
-                sb.append("(Loại báo cáo không xác định)");
-        }
-
-        sb.append("\n───────────────────────────────────────────────────────────\n");
-        sb.append("Kết thúc báo cáo.\n");
-        sb.append("═══════════════════════════════════════════════════════════\n");
-        return sb.toString();
+                            if (json.has("monthlyEvents") && chartPanel != null) {
+                                JsonArray arr = json.getAsJsonArray("monthlyEvents");
+                                int[] m = new int[arr.size()];
+                                for (int i = 0; i < arr.size(); i++) {
+                                    m[i] = arr.get(i).getAsInt();
+                                }
+                                chartPanel.setData(m);
+                            }
+                        });
+                    }
+                } catch (Exception ignored) {}
+                return null;
+            }
+        };
+        worker.execute();
     }
 
-    /**
-     * Nội dung báo cáo tổng quan sự kiện.
-     */
-    private String baoCaoTongQuanSuKien() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("1. TỔNG QUAN CÁC SỰ KIỆN\n");
-        sb.append("   ─────────────────────────────────────\n");
-        sb.append(String.format("   • Tổng số sự kiện đã tổ chức: %d\n", 12));
-        sb.append(String.format("   • Sự kiện đang diễn ra:        %d\n", 3));
-        sb.append(String.format("   • Sự kiện sắp tới:             %d\n", 5));
-        sb.append(String.format("   • Sự kiện đã hoàn thành:       %d\n", 4));
-        sb.append("\n");
-        sb.append("2. DANH SÁCH SỰ KIỆN NỔI BẬT\n");
-        sb.append("   ─────────────────────────────────────\n");
-        sb.append("   STT   Tên sự kiện              Ngày tổ chức   Trạng thái\n");
-        sb.append("   1     Hội thảo CNTT 2026       15/10/2026     Đang diễn ra\n");
-        sb.append("   2     Cuộc thi Code War        20/10/2026     Sắp tới\n");
-        sb.append("   3     Giao lưu doanh nghiệp    25/10/2026     Sắp tới\n");
-        sb.append("   4     Workshop AI cơ bản       05/10/2026     Hoàn thành\n");
-        sb.append("   5     Teambuilding liên chi đoàn 01/10/2026    Hoàn thành\n");
-        sb.append("\n");
-        sb.append("3. KẾT LUẬN\n");
-        sb.append("   ─────────────────────────────────────\n");
-        sb.append("   Hoạt động sự kiện trong giai đoạn này diễn ra ổn định, \n");
-        sb.append("   đa số sự kiện hoàn thành đúng kế hoạch. Cần tập trung \n");
-        sb.append("   nguồn lực cho 2 sự kiện lớn sắp tới.\n");
-        return sb.toString();
-    }
-
-    /**
-     * Nội dung báo cáo tiến độ công việc.
-     */
-    private String baoCaoTienDoCongViec() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("1. TỔNG QUAN TIẾN ĐỘ CÔNG VIỆC\n");
-        sb.append("   ─────────────────────────────────────\n");
-        sb.append(String.format("   • Tổng số công việc:           %d\n", 45));
-        sb.append(String.format("   • Công việc hoàn thành:        %d (%.0f%%)\n", 28, 28.0 / 45 * 100));
-        sb.append(String.format("   • Công việc đang thực hiện:    %d (%.0f%%)\n", 12, 12.0 / 45 * 100));
-        sb.append(String.format("   • Công việc chậm tiến độ:      %d (%.0f%%)\n", 3, 3.0 / 45 * 100));
-        sb.append(String.format("   • Công việc chưa bắt đầu:      %d (%.0f%%)\n", 2, 2.0 / 45 * 100));
-        sb.append("\n");
-        sb.append("2. DANH SÁCH CÔNG VIỆC CHỒM TIẾN ĐỘ\n");
-        sb.append("   ─────────────────────────────────────\n");
-        sb.append("   STT   Công việc                Tiến độ   Trạng thái\n");
-        sb.append("   1     Lên kế hoạch sự kiện     100%      Hoàn thành\n");
-        sb.append("   2     Thuê địa điểm            100%      Hoàn thành\n");
-        sb.append("   3     In ấn thiệp mời          70%       Đang thực hiện\n");
-        sb.append("   4     Liên hệ diễn giả         85%       Đang thực hiện\n");
-        sb.append("   5     Chuẩn bị tài liệu        40%       Chậm tiến độ\n");
-        sb.append("   6     Báo cáo kết quả          0%        Chưa bắt đầu\n");
-        sb.append("\n");
-        sb.append("3. KẾT LUẬN\n");
-        sb.append("   ─────────────────────────────────────\n");
-        sb.append("   Tỷ lệ công việc hoàn thành đạt 62%, cao hơn mục tiêu 60%.\n");
-        sb.append("   Tuy nhiên còn 3 công việc chậm tiến độ cần đẩy nhanh \n");
-        sb.append("   trong tuần tới để đảm bảo sự kiện diễn ra đúng lịch.\n");
-        return sb.toString();
-    }
-
-    /**
-     * Nội dung báo cáo người tham gia.
-     */
-    private String baoCaoNguoiThamGia() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("1. TỔNG QUAN NGƯỜI THAM GIA\n");
-        sb.append("   ─────────────────────────────────────\n");
-        sb.append(String.format("   • Tổng số người đã đăng ký:    %d\n", 320));
-        sb.append(String.format("   • Đã điểm danh tham gia:       %d (%.0f%%)\n", 285, 285.0 / 320 * 100));
-        sb.append(String.format("   • Vắng mặt:                    %d (%.0f%%)\n", 35, 35.0 / 320 * 100));
-        sb.append("\n");
-        sb.append("2. PHÂN LOẠI NGƯỜI THAM GIA\n");
-        sb.append("   ─────────────────────────────────────\n");
-        sb.append("   Vai trò               Số lượng   Tỷ lệ\n");
-        sb.append(String.format("   Sinh viên CNTT        %d        %.0f%%\n", 210, 210.0 / 320 * 100));
-        sb.append(String.format("   Lớp trưởng            %d         %.0f%%\n", 45, 45.0 / 320 * 100));
-        sb.append(String.format("   Ban tổ chức           %d         %.0f%%\n", 40, 40.0 / 320 * 100));
-        sb.append(String.format("   Giảng viên cố vấn     %d         %.0f%%\n", 25, 25.0 / 320 * 100));
-        sb.append("\n");
-        sb.append("3. DANH SÁCH NGƯỜI THAM GIA ĐIỂM DANH (MẪU)\n");
-        sb.append("   ─────────────────────────────────────\n");
-        sb.append("   Mã SV    Họ tên                 Email                     Trạng thái\n");
-        sb.append("   HS001    Nguyễn Văn An          an.nguyen@student.edu.vn   Đã điểm danh\n");
-        sb.append("   HS002    Trần Thị Bình          binh.tran@student.edu.vn   Đã điểm danh\n");
-        sb.append("   HS003    Lê Hoàng Cường         cuong.le@student.edu.vn    Đã điểm danh\n");
-        sb.append("   HS004    Phạm Thị Dung          dung.pham@student.edu.vn   Chưa điểm danh\n");
-        sb.append("   HS005    Võ Minh Đức            duc.vo@student.edu.vn      Đã điểm danh\n");
-        sb.append("   ...    (còn 315 bản ghi nữa)\n");
-        sb.append("\n");
-        sb.append("4. KẾT LUẬN\n");
-        sb.append("   ─────────────────────────────────────\n");
-        sb.append("   Tỷ lệ tham gia đạt 89%, cao hơn dự kiến. Sinh viên CNTT \n");
-        sb.append("   chiếm tỷ lệ lớn nhất. Cần nhắc nhở các bạn chưa điểm danh.\n");
-        return sb.toString();
-    }
-
-    /**
-     * Xử lý xuất excel (hiện tại chỉ thông báo vì chưa tích hợp thư viện).
-     */
-    private void xuatExcel() {
-        JOptionPane.showMessageDialog(mainPanel,
-                "Chức năng xuất Excel sẽ được tích hợp sau.\nHiện tại báo cáo đang được hiển thị ở vùng văn bản bên dưới.",
-                "Xuất Excel", JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    // hàm public để dashboard lấy ra để hiển thị
     public JPanel getMainPanel() {
         return mainPanel;
     }
@@ -266,4 +230,108 @@ public class Lapbaocaothongke {
     private void $$$setupUI$$$() {
     }
 
+    private static class BarChartPanel extends JPanel {
+        private int[] data;
+
+        public BarChartPanel(int[] data) {
+            this.data = data;
+        }
+
+        public void setData(int[] newData) {
+            this.data = newData;
+            repaint();
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
+            int width = getWidth();
+            int height = getHeight();
+
+            int leftMargin = 70;
+            int rightMargin = 40;
+            int topMargin = 30;
+            int bottomMargin = 45;
+
+            int plotWidth = width - leftMargin - rightMargin;
+            int plotHeight = height - topMargin - bottomMargin;
+
+            if (plotWidth <= 0 || plotHeight <= 0) {
+                g2.dispose();
+                return;
+            }
+
+            // Draw Y-axis reference lines and labels (0, 0,5, 1, 1,5, 2, 2,5, 3, 3,5)
+            double maxY = 3.5;
+            int steps = 7;
+            g2.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+
+            for (int i = 0; i <= steps; i++) {
+                double val = i * 0.5;
+                int y = topMargin + plotHeight - (int) ((val / maxY) * plotHeight);
+
+                // Grid line
+                g2.setColor(new Color(225, 225, 225));
+                g2.drawLine(leftMargin, y, leftMargin + plotWidth, y);
+
+                // Y label
+                g2.setColor(new Color(50, 50, 50));
+                String labelStr = (val == (long) val) ? String.format("%d", (long) val) : String.format("%.1f", val).replace(".", ",");
+                FontMetrics fm = g2.getFontMetrics();
+                g2.drawString(labelStr, leftMargin - fm.stringWidth(labelStr) - 10, y + 4);
+
+                // Small tick
+                g2.setColor(new Color(100, 100, 100));
+                g2.drawLine(leftMargin - 4, y, leftMargin, y);
+            }
+
+            // Draw Y-axis line
+            g2.setColor(new Color(160, 160, 160));
+            g2.drawLine(leftMargin, topMargin, leftMargin, topMargin + plotHeight);
+
+            // Draw Bars
+            int numBars = data != null ? data.length : 12;
+            int slotWidth = plotWidth / numBars;
+            int barWidth = Math.min(36, (int) (slotWidth * 0.65));
+
+            Color barColor = new Color(60, 120, 168);
+
+            for (int i = 0; i < numBars; i++) {
+                int val = (data != null && i < data.length) ? data[i] : 0;
+                int x = leftMargin + i * slotWidth + (slotWidth - barWidth) / 2;
+                int barH = (int) ((val / maxY) * plotHeight);
+                int y = topMargin + plotHeight - barH;
+
+                // Bar
+                if (val > 0) {
+                    g2.setColor(barColor);
+                    g2.fillRect(x, y, barWidth, barH);
+                }
+
+                // Bar value text
+                g2.setColor(new Color(40, 40, 40));
+                g2.setFont(new Font("Segoe UI", Font.BOLD, 12));
+                String valStr = String.valueOf(val);
+                FontMetrics fmVal = g2.getFontMetrics();
+                g2.drawString(valStr, x + (barWidth - fmVal.stringWidth(valStr)) / 2, y - 6);
+
+                // Month tick & label
+                int tickX = leftMargin + i * slotWidth + slotWidth / 2;
+                g2.setColor(new Color(120, 120, 120));
+                g2.drawLine(tickX, topMargin + plotHeight, tickX, topMargin + plotHeight + 4);
+
+                g2.setColor(new Color(40, 40, 40));
+                g2.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+                String monthStr = "T" + (i + 1);
+                FontMetrics fmMonth = g2.getFontMetrics();
+                g2.drawString(monthStr, tickX - fmMonth.stringWidth(monthStr) / 2, topMargin + plotHeight + 20);
+            }
+
+            g2.dispose();
+        }
+    }
 }
