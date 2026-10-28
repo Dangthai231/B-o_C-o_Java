@@ -275,8 +275,8 @@ public class Login {
                 dashboardFrame.setContentPane(new DashboardCanbo(username).getMainPanel());
                 break;
             case "HOC_SINH":
-                dashboardFrame.setTitle("Dashboard - Học sinh");
-                dashboardFrame.setContentPane(new DashboardHocSinh().getMainPanel());
+                dashboardFrame.setTitle("Sinh viên - Sự kiện Liên Chi đoàn CNTT");
+                dashboardFrame.setContentPane(new DashboardHocSinh(username).getMainPanel());
                 break;
             default:
                 JOptionPane.showMessageDialog(null, "Vai trò không hợp lệ!");
