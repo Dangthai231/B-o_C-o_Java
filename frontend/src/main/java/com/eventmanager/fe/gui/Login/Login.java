@@ -148,6 +148,9 @@ public class Login {
         Color btnBlue = new Color(37, 99, 235);
         Color btnBlueHover = new Color(29, 78, 216);
         btnDangNhap.setBackground(btnBlue);
+        // Giao diện Windows bỏ qua setBackground của JButton -> tự tô nền, nếu không chữ trắng trên nền trắng
+        btnDangNhap.setContentAreaFilled(false);
+        btnDangNhap.setOpaque(true);
         btnDangNhap.setFocusPainted(false);
         btnDangNhap.setBorder(new EmptyBorder(10, 0, 10, 0));
         btnDangNhap.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));

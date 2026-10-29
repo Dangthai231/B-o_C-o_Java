@@ -120,6 +120,10 @@ public final class HocSinhUI {
         JButton btn = taoNut(text);
         btn.setBackground(PRIMARY);
         btn.setForeground(Color.WHITE);
+        // Giao diện Windows bỏ qua setBackground của JButton -> tự tô nền, nếu không chữ trắng trên nền trắng
+        btn.setContentAreaFilled(false);
+        btn.setOpaque(true);
+        btn.setBorder(new EmptyBorder(6, 16, 6, 16));
         return btn;
     }
 
