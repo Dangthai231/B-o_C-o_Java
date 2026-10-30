@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface SuKienRepository extends JpaRepository<SuKien, Long> {
@@ -13,4 +14,6 @@ public interface SuKienRepository extends JpaRepository<SuKien, Long> {
     // Spring Data tự sinh câu SQL từ tên hàm
     List<SuKien> findByTenSuKienContainingIgnoreCaseAndThoiGianBatDauBetweenOrderByThoiGianBatDauAsc(
             String tuKhoa, LocalDateTime tu, LocalDateTime den);
+
+    Optional<SuKien> findByMaSuKien(String maSuKien);
 }
